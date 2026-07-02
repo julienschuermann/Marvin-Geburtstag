@@ -10,25 +10,30 @@ body{
   background:linear-gradient(135deg,#000,#2b1b00);
   color:white;
   text-align:center;
-  overflow:hidden;
 }
-h1{margin-top:20px;color:gold}
-#game{display:grid;grid-template-rows:repeat(6,1fr);gap:5px;width:300px;margin:20px auto;}
-.row{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;}
+h1{color:gold;margin-top:20px;}
+#game{display:flex;flex-direction:column;gap:5px;align-items:center;margin-top:20px;}
+.row{display:flex;gap:5px;}
 .tile{
   width:40px;height:40px;
-  display:flex;align-items:center;justify-content:center;
   border:2px solid #555;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   font-weight:bold;
-  font-size:20px;
   text-transform:uppercase;
 }
-input{position:absolute;opacity:0;}
-#msg{font-size:24px;margin-top:10px;color:gold}
-button{margin-top:10px;padding:10px 20px;font-size:16px}
+input{
+  position:absolute;
+  opacity:0;
+}
+#msg{color:gold;font-size:24px;margin-top:10px;}
+button{margin-top:10px;padding:10px 20px;}
 .confetti{
-  position:fixed;width:10px;height:10px;
-  top:-10px;animation:fall 3s linear infinite;
+  position:fixed;
+  width:8px;height:8px;
+  top:-10px;
+  animation:fall 3s linear forwards;
 }
 @keyframes fall{
   to{transform:translateY(110vh) rotate(360deg);}
@@ -38,6 +43,7 @@ button{margin-top:10px;padding:10px 20px;font-size:16px}
 <body>
 
 <h1>🎂 30. Geburtstag 🎂</h1>
+
 <div id="game"></div>
 <div id="msg"></div>
 <button onclick="reset()">Nochmal</button>
@@ -46,7 +52,7 @@ button{margin-top:10px;padding:10px 20px;font-size:16px}
 
 <script>
 const WORD="STRYCK";
-let row=0,guess="";
+let row=0;
 
 const game=document.getElementById("game");
 
@@ -54,60 +60,70 @@ for(let i=0;i<6;i++){
   let r=document.createElement("div");
   r.className="row";
   for(let j=0;j<6;j++){
-    let d=document.createElement("div");
-    d.className="tile";
-    r.appendChild(d);
+    let t=document.createElement("div");
+    t.className="tile";
+    r.appendChild(t);
   }
   game.appendChild(r);
 }
 
-document.getElementById("input").addEventListener("input",e=>{
-  guess=e.target.value.toUpperCase();
-  draw();
-  if(guess.length===6){
-    check();
+const input=document.getElementById("input");
+
+function focusInput(){
+  input.focus();
+}
+
+document.addEventListener("click",focusInput);
+window.onload=focusInput;
+
+input.addEventListener("input",e=>{
+  let val=e.target.value.toUpperCase();
+  draw(val);
+
+  if(val.length===6){
+    check(val);
+    input.value="";
   }
 });
 
-function draw(){
+function draw(val){
   let tiles=document.querySelectorAll(".row")[row].children;
   for(let i=0;i<6;i++){
-    tiles[i].textContent=guess[i]||"";
+    tiles[i].textContent=val[i]||"";
   }
 }
 
-function check(){
+function check(val){
   let tiles=document.querySelectorAll(".row")[row].children;
   let word=WORD.split("");
+
   for(let i=0;i<6;i++){
-    if(guess[i]===word[i]){
+    if(val[i]===word[i]){
       tiles[i].style.background="green";
-    }else if(word.includes(guess[i])){
+    }else if(word.includes(val[i])){
       tiles[i].style.background="gold";
     }else{
       tiles[i].style.background="#333";
     }
   }
-  if(guess===WORD){
+
+  if(val===WORD){
     win();
   }
+
   row++;
-  guess="";
-  document.getElementById("input").value="";
 }
 
 function win(){
-  document.getElementById("msg").innerHTML="🎉 Herzlichen Glückwunsch zum 30. Geburtstag! 🎉";
-  confetti();
-}
+  document.getElementById("msg").innerHTML=
+  "🎉 Herzlichen Glückwunsch zum 30. Geburtstag! 🎉";
 
-function confetti(){
-  for(let i=0;i<100;i++){
+  for(let i=0;i<120;i++){
     let c=document.createElement("div");
     c.className="confetti";
     c.style.left=Math.random()*100+"vw";
     c.style.background=["red","gold","blue","pink"][Math.floor(Math.random()*4)];
-    c.style.animationDuration=(Math.random()*3+2)+"s";
+    c.style.animationDuration=(Math.random()*2+2)+"s";
     document.body.appendChild(c);
   }
 }
