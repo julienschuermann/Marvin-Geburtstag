@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>30. Geburtstag Wordle</title>
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:linear-gradient(135deg,#000,#2b1b00);
+  color:white;
+  text-align:center;
+  overflow:hidden;
+}
+h1{margin-top:20px;color:gold}
+#game{display:grid;grid-template-rows:repeat(6,1fr);gap:5px;width:300px;margin:20px auto;}
+.row{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;}
+.tile{
+  width:40px;height:40px;
+  display:flex;align-items:center;justify-content:center;
+  border:2px solid #555;
+  font-weight:bold;
+  font-size:20px;
+  text-transform:uppercase;
+}
+input{position:absolute;opacity:0;}
+#msg{font-size:24px;margin-top:10px;color:gold}
+button{margin-top:10px;padding:10px 20px;font-size:16px}
+.confetti{
+  position:fixed;width:10px;height:10px;
+  top:-10px;animation:fall 3s linear infinite;
+}
+@keyframes fall{
+  to{transform:translateY(110vh) rotate(360deg);}
+}
+</style>
+</head>
+<body>
+
+<h1>🎂 30. Geburtstag 🎂</h1>
+<div id="game"></div>
+<div id="msg"></div>
+<button onclick="reset()">Nochmal</button>
+
+<input id="input" maxlength="6" autofocus>
+
+<script>
+const WORD="STRYCK";
+let row=0,guess="";
+
+const game=document.getElementById("game");
+
+for(let i=0;i<6;i++){
+  let r=document.createElement("div");
+  r.className="row";
+  for(let j=0;j<6;j++){
+    let d=document.createElement("div");
+    d.className="tile";
+    r.appendChild(d);
+  }
+  game.appendChild(r);
+}
+
+document.getElementById("input").addEventListener("input",e=>{
+  guess=e.target.value.toUpperCase();
+  draw();
+  if(guess.length===6){
+    check();
+  }
+});
+
+function draw(){
+  let tiles=document.querySelectorAll(".row")[row].children;
+  for(let i=0;i<6;i++){
+    tiles[i].textContent=guess[i]||"";
+  }
+}
+
+function check(){
+  let tiles=document.querySelectorAll(".row")[row].children;
+  let word=WORD.split("");
+  for(let i=0;i<6;i++){
+    if(guess[i]===word[i]){
+      tiles[i].style.background="green";
+    }else if(word.includes(guess[i])){
+      tiles[i].style.background="gold";
+    }else{
+      tiles[i].style.background="#333";
+    }
+  }
+  if(guess===WORD){
+    win();
+  }
+  row++;
+  guess="";
+  document.getElementById("input").value="";
+}
+
+function win(){
+  document.getElementById("msg").innerHTML="🎉 Herzlichen Glückwunsch zum 30. Geburtstag! 🎉";
+  confetti();
+}
+
+function confetti(){
+  for(let i=0;i<100;i++){
+    let c=document.createElement("div");
+    c.className="confetti";
+    c.style.left=Math.random()*100+"vw";
+    c.style.background=["red","gold","blue","pink"][Math.floor(Math.random()*4)];
+    c.style.animationDuration=(Math.random()*3+2)+"s";
+    document.body.appendChild(c);
+  }
+}
+
+function reset(){
+  location.reload();
+}
+</script>
+
+</body>
+</html>
