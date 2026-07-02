@@ -95,32 +95,34 @@ h1{
 <h1>🎂 30. Geburtstag 🎂</h1>
 
 <div id="board"></div>
-
 <div id="keyboard"></div>
-
 <div id="msg"></div>
 
 <script>
+
 const WORD = "STRYCK";
 const LEN = 6;
+
 let row = 0;
 let current = "";
 
-// Board bauen
+// BOARD
 const board = document.getElementById("board");
 
 for(let i=0;i<6;i++){
   let r = document.createElement("div");
   r.className = "row";
+
   for(let j=0;j<LEN;j++){
     let t = document.createElement("div");
     t.className = "tile";
     r.appendChild(t);
   }
+
   board.appendChild(r);
 }
 
-// Keyboard Layout
+// KEYBOARD
 const layout = [
 "QWERTZUIOP",
 "ASDFGHJKL",
@@ -137,25 +139,29 @@ layout.forEach(line=>{
     let key = document.createElement("div");
     key.className = "key";
     key.innerText = letter;
-
     key.onclick = ()=>handleKey(letter);
-
     rowDiv.appendChild(key);
   });
 
   keyboard.appendChild(rowDiv);
 });
 
-// Eingabe
+// INPUT
 document.addEventListener("keydown",e=>{
   let k = e.key.toUpperCase();
+
   if(k==="BACKSPACE"){
     current = current.slice(0,-1);
-  }else if(/^[A-Z]$/.test(k)){
+  }
+
+  else if(/^[A-Z]$/.test(k)){
     if(current.length < LEN) current += k;
-  }else if(k==="ENTER"){
+  }
+
+  else if(k==="ENTER"){
     if(current.length === LEN) check();
   }
+
   draw();
 });
 
@@ -163,10 +169,16 @@ function handleKey(k){
   if(current.length < LEN){
     current += k;
   }
+
   draw();
+
+  // AUTO CHECK
+  if(current.length === LEN){
+    setTimeout(check, 120);
+  }
 }
 
-// Board zeichnen
+// DRAW
 function draw(){
   let tiles = document.querySelectorAll(".row")[row].children;
 
@@ -175,43 +187,74 @@ function draw(){
   }
 }
 
-// Prüfen
+// CHECK LOGIC (korrekt Wordle-style)
 function check(){
+
   let tiles = document.querySelectorAll(".row")[row].children;
 
   let solution = WORD.split("");
   let guess = current.split("");
 
+  let solutionCopy = [...solution];
+  let colors = Array(LEN).fill("gray");
+
+  // Grün
+  for(let i=0;i<LEN;i++){
+    if(guess[i] === solution[i]){
+      colors[i] = "green";
+      solutionCopy[i] = null;
+    }
+  }
+
+  // Gelb
+  for(let i=0;i<LEN;i++){
+    if(colors[i] !== "green"){
+      let idx = solutionCopy.indexOf(guess[i]);
+      if(idx !== -1){
+        colors[i] = "gold";
+        solutionCopy[idx] = null;
+      }
+    }
+  }
+
+  // Tiles färben
+  for(let i=0;i<LEN;i++){
+    tiles[i].style.background =
+      colors[i]==="green" ? "green" :
+      colors[i]==="gold" ? "gold" : "#333";
+  }
+
+  // Keyboard update
   let keyStates = {};
 
   for(let i=0;i<LEN;i++){
-    if(guess[i] === solution[i]){
-      tiles[i].style.background="green";
-      keyStates[guess[i]]="green";
+    let l = guess[i];
+
+    if(colors[i]==="green"){
+      keyStates[l]="green";
     }
-    else if(solution.includes(guess[i])){
-      tiles[i].style.background="gold";
-      if(keyStates[guess[i]]!=="green")
-        keyStates[guess[i]]="yellow";
+    else if(colors[i]==="gold" && keyStates[l]!=="green"){
+      keyStates[l]="yellow";
     }
-    else{
-      tiles[i].style.background="#333";
-      if(!keyStates[guess[i]])
-        keyStates[guess[i]]="gray";
+    else if(!keyStates[l]){
+      keyStates[l]="gray";
     }
   }
 
   updateKeyboard(keyStates);
 
+  // WIN
   if(current === WORD){
     win();
+    return;
   }
 
+  // NEXT ROW
   row++;
   current="";
 }
 
-// Tastatur einfärben
+// KEYBOARD COLORS
 function updateKeyboard(states){
   document.querySelectorAll(".key").forEach(k=>{
     let l = k.innerText;
@@ -221,7 +264,7 @@ function updateKeyboard(states){
   });
 }
 
-// Gewinn
+// WIN SCREEN
 function win(){
   document.getElementById("msg").innerHTML =
   "🎉 Herzlichen Glückwunsch zum 30. Geburtstag! 🎉";
@@ -235,6 +278,7 @@ function win(){
     document.body.appendChild(c);
   }
 }
+
 </script>
 
 </body>
